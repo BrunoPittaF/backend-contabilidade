@@ -121,6 +121,25 @@ app.put("/task/:id", (request, response) => {
   return response.status(201).send();
 });
 
+app.delete("/task/:id", (request, response) => {
+  const { user } = request;
+  const idTask = request.params.id;
+
+  let taskDeleted = user.statement.find((task) => task.id === idTask);
+  console.log(taskDeleted);
+
+  if (!taskDeleted) {
+    return response.status(400).json({ error: "Transação não encontrada" });
+  }
+
+  user.statement.splice(taskDeleted, 1);
+
+  const balance = getBalance(user.statement);
+  user.total_money = balance;
+
+  return response.status(200).json(user.statement);
+});
+
 app.put("/account", (request, response) => {
   const { name, email } = request.body;
   const { user } = request;
