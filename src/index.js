@@ -17,10 +17,10 @@ const fakeBD = [];
 
 //Middleware
 
-function verifyIfExistsAccountEmail(request, response, next) {
-  const { email } = request.headers;
+function verifyIfExistsAccountCPF(request, response, next) {
+  const { cpf } = request.headers;
 
-  const user = fakeBD.find((user) => user.email === email);
+  const user = fakeBD.find((user) => user.cpf === cpf);
 
   if (!user) {
     return response.status(400).json({ error: "Usuário não encontrado" });
@@ -44,26 +44,27 @@ function getBalance(statement) {
 }
 
 app.post("/account", (request, response) => {
-  const { email, name } = request.body;
+  const { email, name, cpf, total_money } = request.body;
 
-  const userAlreadyExists = fakeBD.some((account) => account.email === email);
+  const userAlreadyExists = fakeBD.some((account) => account.cpf === cpf);
 
   if (userAlreadyExists) {
-    return response.status(400).json({ error: "Email já Cadastrado" });
+    return response.status(400).json({ error: "CPF já Cadastrado" });
   }
 
   fakeBD.push({
     email,
     name,
+    cpf,
     id: uuidv4(),
     statement: [],
-    total_money: 0,
+    total_money,
   });
 
   return response.status(201).send();
 });
 
-app.use(verifyIfExistsAccountEmail);
+app.use(verifyIfExistsAccountCPF);
 
 app.get("/statement", (request, response) => {
   const { user } = request;
@@ -73,9 +74,8 @@ app.get("/statement", (request, response) => {
 app.post("/task", (request, response) => {
   const { description, amount, type } = request.body;
   const { user } = request;
-  const balance = getBalance(user.statement);
 
-  if (balance < amount) {
+  if (type === "withdraw" && user.total_money < amount) {
     return response
       .status(400)
       .json({ error: "Saldo insuficiente, impossível registrar a operação" });
@@ -86,13 +86,62 @@ app.post("/task", (request, response) => {
     amount,
     created_at: new Date(),
     type,
+    id: uuidv4(),
   };
 
   user.statement.push(statementOperation);
 
+  const balance = getBalance(user.statement);
   user.total_money = balance;
 
   return response.status(201).send();
 });
 
+app.put("/task/:id", (request, response) => {
+  const { user } = request;
+  const { description, amount, type } = request.body;
+  const idTask = request.params.id;
+
+  if (type === "withdraw" && user.total_money < amount) {
+    return response.status(400).json({
+      error: "Saldo insuficiente, não é possivel ficar com saldo negativo",
+    });
+  }
+
+  user.statement.map((transaction) => {
+    if (transaction.id === idTask) {
+      transaction.description = description;
+      transaction.amount = amount;
+      transaction.type = type;
+    }
+  });
+  const balance = getBalance(user.statement);
+  user.total_money = balance;
+
+  return response.status(201).send();
+});
+
+app.put("/account", (request, response) => {
+  const { name, email } = request.body;
+  const { user } = request;
+
+  user.name = name;
+  user.email = email;
+
+  return response.status(201).send();
+});
+
+app.get("/account", (request, response) => {
+  const { user } = request;
+
+  return response.status(200).json(user);
+});
+
+app.delete("/account", (request, response) => {
+  const { user } = request;
+
+  fakeBD.splice(user, 1);
+
+  return response.status(200).json(fakeBD);
+});
 app.listen(3333);
