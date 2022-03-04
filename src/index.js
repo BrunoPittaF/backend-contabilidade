@@ -1,4 +1,3 @@
-const { request } = require("express");
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 
@@ -95,6 +94,15 @@ app.post("/task", (request, response) => {
   user.total_money = balance;
 
   return response.status(201).send();
+});
+
+app.get("/task/:id", (request, response) => {
+  const { user } = request;
+  const idTask = request.params.id;
+
+  const task = user.statement.find((transaction) => transaction.id === idTask);
+
+  return response.status(200).json(task);
 });
 
 app.put("/task/:id", (request, response) => {
