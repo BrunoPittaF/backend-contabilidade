@@ -1,6 +1,8 @@
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 
+var port = process.env.PORT || 8080;
+
 /* 
 Response.Route/Query/Body
 Route Params = identificar um parametro na rota, serve pra editar/deletar/buscar
@@ -171,4 +173,4 @@ app.delete("/account", (request, response) => {
 
   return response.status(200).json(fakeBD);
 });
-app.listen(3333);
+app.listen(port);
