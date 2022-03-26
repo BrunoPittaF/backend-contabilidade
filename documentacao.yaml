@@ -1,0 +1,115 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/BrunoPittaF/Backend-Contabilidade/1.0.0
+info:
+  description: Api com um pequeno sistema contábil
+  version: "1.0.0"
+  title: Simple Inventory API
+  contact:
+    email: caiobrunopittaf@gmail.com
+paths:
+  /account:
+    get:
+      tags:
+        - Usuários
+      summary: Buscar usuário
+      operationId: searchInventory
+      description: |
+        Busca os dados de um usuário em específico
+      parameters:
+        - in: header
+          name: cpf
+          description: string contendo o cpf do usuário que precisa buscar os dados
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Retorna o usuário em questão
+          content:
+            application/json:
+              schema:
+                example:
+                  id: "1bd0645c-f431-474f-ba0a-6a73c3fd68d0"
+                  name: "bruno"
+                  total_money: 8000,
+                  email: "caiobrunopittaf@gmail.com"
+                  cpf: "789456415351"
+                  statement:
+                    [
+                      {
+                        description: "novo7",
+                        amount: 7000,
+                        created_at: "2022-03-04T00:07:45.044Z",
+                        type: "deposit",
+                        id: "1bd0645c-f431-474f-ba0a-6a73c3fd68d0",
+                      },
+                    ]
+
+        "400":
+          description: Usuário não encontrado
+    post:
+      tags:
+        - Criar usuário
+      summary: Criar um novo usuário
+      operationId: addInventory
+      description: Cria um novo usuário
+      parameters:
+        - in: query
+          name: cpf
+          description: string contendo o cpf do usuário
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: email
+          description: string contendo o email do usuário
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: name
+          description: string contendo o nome do usuário
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: total_money
+          description: Número contendo o total de dinheiro do usuário
+          required: true
+          schema:
+            type: number
+      responses:
+        "201":
+          description: Usuário criado
+        "400":
+          description: "Campo vazio, objeto inválido"
+        "409":
+          description: Usuário já cadastrado
+      requestBody:
+        content:
+          application/json:
+            schema:
+              example: {}
+        description: Inventory item to add
+components:
+  schemas:
+    InventoryItem:
+      type: object
+      required:
+        - email
+        - name
+        - cpf
+      properties:
+        cpf:
+          type: string
+          example: "778897465498"
+        name:
+          type: string
+          example: Caio Bruno
+        email:
+          type: string
+          format: email
+          example: caiobrunopittaf@gmail.com

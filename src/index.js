@@ -44,8 +44,24 @@ function getBalance(statement) {
   return balance;
 }
 
+// function checkTypeTotalMoney(request, response, next, money) {
+//   let typeMoney = typeof money;
+//   if (typeMoney != "number" || typeMoney == NaN) {
+//     return response
+//       .status(400)
+//       .json({ error: "O valor do dinheiro não está vindo na tipagem correta" });
+//   } else {
+//     return next();
+//   }
+// }
+
 app.post("/account", (request, response) => {
   const { email, name, cpf, total_money } = request.body;
+  let total_enter_money = 0;
+
+  if (total_money > 0) {
+    total_enter_money = total_money;
+  }
 
   const userAlreadyExists = fakeBD.some((account) => account.cpf === cpf);
 
@@ -59,6 +75,8 @@ app.post("/account", (request, response) => {
     cpf,
     id: uuidv4(),
     statement: [],
+    total_enter_money,
+    total_exit_money: 0,
     total_money,
   });
 
@@ -95,6 +113,14 @@ app.post("/task", (request, response) => {
   const balance = getBalance(user.statement);
   user.total_money = balance;
 
+  if (type === "deposit") {
+    user.total_enter_money += amount;
+  }
+
+  if (type === "withdraw") {
+    user.total_exit_money += amount;
+  }
+
   return response.status(201).send();
 });
 
@@ -128,6 +154,14 @@ app.put("/task/:id", (request, response) => {
   const balance = getBalance(user.statement);
   user.total_money = balance;
 
+  if (type === "deposit") {
+    user.total_enter_money += amount;
+  }
+
+  if (type === "withdraw") {
+    user.total_exit_money += amount;
+  }
+
   return response.status(201).send();
 });
 
@@ -136,7 +170,6 @@ app.delete("/task/:id", (request, response) => {
   const idTask = request.params.id;
 
   let taskDeleted = user.statement.find((task) => task.id === idTask);
-  console.log(taskDeleted);
 
   if (!taskDeleted) {
     return response.status(400).json({ error: "Transação não encontrada" });
