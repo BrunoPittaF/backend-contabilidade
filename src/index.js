@@ -1,5 +1,6 @@
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
+var cors = require("cors");
 
 var port = process.env.PORT || 8080;
 
@@ -12,6 +13,7 @@ Body Params = Corpo da Requisição
 */
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const fakeBD = [];
