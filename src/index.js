@@ -93,7 +93,7 @@ app.get("/statement", (request, response) => {
 });
 
 app.post("/task", (request, response) => {
-  const { description, amount, type } = request.body;
+  const { title, amount, type, category } = request.body;
   const { user } = request;
 
   if (type === "withdraw" && user.total_money < amount) {
@@ -103,10 +103,11 @@ app.post("/task", (request, response) => {
   }
 
   const statementOperation = {
-    description,
+    title,
     amount,
     created_at: new Date(),
     type,
+    category,
     id: uuidv4(),
   };
 
@@ -137,7 +138,7 @@ app.get("/task/:id", (request, response) => {
 
 app.put("/task/:id", (request, response) => {
   const { user } = request;
-  const { description, amount, type } = request.body;
+  const { title, amount, type, category } = request.body;
   const idTask = request.params.id;
 
   if (type === "withdraw" && user.total_money < amount) {
@@ -148,9 +149,10 @@ app.put("/task/:id", (request, response) => {
 
   user.statement.map((transaction) => {
     if (transaction.id === idTask) {
-      transaction.description = description;
+      transaction.title = title;
       transaction.amount = amount;
       transaction.type = type;
+      transaction.category = category;
     }
   });
   const balance = getBalance(user.statement);
